@@ -1,0 +1,21 @@
+#pragma once
+#include <pgmspace.h>
+const char INDEX_HTML[] PROGMEM = R"HTML(
+<!doctype html><html><head><meta charset="utf-8">
+<title>PikoDAT... ESP32 </title></head><body>
+<h2>PikoDAT@ESP32 läuft</h2>
+</body></html>
+)HTML";
+
+/*
+<p><a href="/update">OTA Update</a></p>
+<p><a href="/ajax">AJAX UI</a></p>
+*/
+
+const char UPDATE_HTML[] PROGMEM = R"HTML(
+<!doctype html><html><head><meta charset="utf-8">
+<title>ESP32 OTA</title></head><body>
+<h2>Firmware-Update</h2>
+<form method="POST" action="/update" enctype="multipart/form-data"><input type="file" name="update" accept=".bin" required> <input type="submit" value="Upload"></form>
+<p>Nach erfolgreichem Upload startet der ESP32 neu.</p>
+</body></html>)HTML";
