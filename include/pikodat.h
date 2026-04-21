@@ -4,6 +4,7 @@
 Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
 uint8_t LEDdim = 26; // ~10% von 255
 unsigned long long ptick = 0;
+static int g_mode_max = 1;
 
 // ########## OUTPUT ##########
 uint32_t warmWhite(uint8_t brightness /*0..255*/) {
@@ -49,13 +50,13 @@ void task_piOUT_0(){
   //strip.setPixelColor(LED_COUNT-1, 0); 
   strip.setPixelColor(LED_COUNT-2, 0); 
   //if(ptick%2==0 ){strip.setPixelColor(LED_COUNT-1, Color_R()); }
-  if(ptick%2==1 ){strip.setPixelColor(LED_COUNT-2, Color_G()); }
+  if(ptick%2==1 ){strip.setPixelColor(LED_COUNT-2, Color_R()); }
 
   strip.show();
 }
 
 // Zufälliges grünes Muster, das pro Aufruf um 1 weiter wandert (Ring)
-void task_piOUT1() {
+void task_piOUT2() {
   static unsigned long last = 0;
   const unsigned long interval = 150;
   static uint16_t mask = 0;   // 13-bit Muster (für LED_COUNT=13)
@@ -73,10 +74,33 @@ void task_piOUT1() {
     bool on = (mask >> src) & 1U;
     strip.setPixelColor(i, on ? Color_G() : 0);
   }
+    strip.setPixelColor(LED_COUNT-2, 0); 
+  //if(ptick%2==0 ){strip.setPixelColor(LED_COUNT-1, Color_R()); }
+  if(ptick%2==1 ){strip.setPixelColor(LED_COUNT-2, Color_G()); }
   strip.show();
   offset = (offset + 1) % LED_COUNT;
 }
-
+// Zufälliges grünes Muster:
+// Bei jedem Schritt wird alles um 1 weitergeschoben.
+// An Position 0 wird mit Wahrscheinlichkeit 1/3 eine grüne LED eingespeist.
+void task_piOUT1() {
+  static unsigned long last = 0;
+  const unsigned long interval = 150;
+  static uint16_t mask = 0;   // Bitmuster für die LEDs
+  unsigned long now = millis();
+  if (now - last < interval) return;
+  last = now;
+  mask <<= 1;     // Alles um 1 weiterschieben
+  if (random(3) == 0) { mask |= 0x0001;  }// Neue LED an Position 0 mit Wahrscheinlichkeit 1/3 setzen
+  mask &= ((1U << LED_COUNT) - 1);
+  for (uint8_t i = 0; i < LED_COUNT; i++) {
+    bool on = (mask >> i) & 1U;
+    strip.setPixelColor(i, on ? Color_G() : 0);
+  }
+  strip.setPixelColor(LED_COUNT - 2, 0);
+  if (ptick % 2 == 1) { strip.setPixelColor(LED_COUNT - 2, Color_G()); }
+  strip.show();
+}
 
 // ########## INPUT ##########
 constexpr uint8_t IN_COUNT = 11;
@@ -107,6 +131,8 @@ void task_piIN_0() {
     Serial.print("IN:");
     Serial.println(bits);
   }
+  if (bits[IN_COUNT-1]== '1') {g_mode++;} 
+  if (g_mode > g_mode_max) {g_mode=0;} 
 }
 
 void init_PIKODAT(){
@@ -118,7 +144,7 @@ void init_PIKODAT(){
 
 void task_PIKODAT() {
   ptick++;  
-  if(g_mode== 0){
+  if(g_mode == 0){
     task_piOUT_0();
     task_piIN_0();
   }

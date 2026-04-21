@@ -91,7 +91,7 @@ void handleRoot() {
 }
 
 
-/*
+/**/
 void handleUpdateForm() {
   server.send(200, "text/html; charset=utf-8", UPDATE_HTML);
 }
@@ -108,7 +108,9 @@ void handleUpdateUpload() {
       // Serial.printf("Update success, size: %u\n", upload.totalSize);
     } else {Update.printError(Serial);}} 
   else if (upload.status == UPLOAD_FILE_ABORTED) {Update.abort();}}
-*/
+
+
+
 bool connectEduroam() {
   Serial.println("Verbinde mit eduroam (WPA2-Enterprise) ...");
   WiFi.disconnect(true, true);
@@ -211,7 +213,7 @@ server.on("/kenbak", HTTP_GET, handleKenbak);
 server.on("/api/key",    HTTP_POST, handleApiKey);
 server.on("/api/state",  HTTP_GET,  handleApiState);
 */
-/*
+/**/
   server.on("/update", HTTP_GET, handleUpdateForm);// GET zeigt Formular
   server.on("/update", HTTP_POST, []() {    // POST nimmt Upload an
       bool ok = !Update.hasError();         // Antwort nach Upload (wichtig: erst senden, dann reboot)
@@ -221,7 +223,7 @@ server.on("/api/state",  HTTP_GET,  handleApiState);
     },
     handleUpdateUpload
   );
-  */
+  
   server.begin();
   Serial.println("HTTP Server gestartet.");
 }
